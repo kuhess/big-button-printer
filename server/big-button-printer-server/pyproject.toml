@@ -8,6 +8,8 @@ authors = ["Quentin Suire <dev@quentinsuire.com>"]
 python = "^3.10"
 Pillow = "^9.0.1"
 click = "^8.0.3"
+Jinja2 = "^3.0.3"
+more-itertools = "^8.12.0"
 
 [tool.poetry.dev-dependencies]
 
