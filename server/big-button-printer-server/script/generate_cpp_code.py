@@ -1,8 +1,9 @@
 import click
 import more_itertools as mit
-from PIL import Image, ImageOps
-from PIL.Image import FLOYDSTEINBERG
+from PIL import Image
 from jinja2.nativetypes import NativeEnvironment
+
+from script.convert import convert_bw, invert_bw
 
 TEMPLATE_STR = """uint8_t bitmap[] = {
     // {{ width }}x{{ height }}px
@@ -20,16 +21,12 @@ TEMPLATE_STR = """uint8_t bitmap[] = {
 
 @click.command()
 @click.option("-w", "--width", default=384)
+@click.option("-l", "--lighten-factor", default=0.5)
 @click.argument("input_file")
-def generate_cpp_code(width, input_file):
+def generate_cpp_code(width, lighten_factor, input_file):
     with Image.open(input_file) as im:
-        resized_im = ImageOps.contain(im, (width, 10000))
-        bw_im = resized_im.convert(mode="1", dither=FLOYDSTEINBERG)
-
-        # invert pixels
-        l_im = bw_im.convert('L')
-        inv_l_im = ImageOps.invert(l_im)
-        inverted_im = inv_l_im.convert('1')
+        bw_im = convert_bw(im, width, lighten_factor)
+        inverted_im = invert_bw(bw_im)
 
         # create CPP variable declaration
         data = inverted_im.tobytes()
