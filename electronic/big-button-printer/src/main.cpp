@@ -1,11 +1,13 @@
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <SoftwareSerial.h>
 
 #include <AceButton.h>
 #include <jled.h>
 
-#include "PrintService.h"
+#include "HttpService.h"
 #include "LedManager.h"
+#include "PrintService.h"
 #include "wifi.h"
 
 #ifndef WIFI_H
@@ -31,6 +33,10 @@ SoftwareSerial printerSerial(PRINTER_RX_PIN, PRINTER_TX_PIN);
 Tprinter printer(&printerSerial, printerBaudRate);
 PrintService printService(printer);
 
+HTTPClient httpClient;
+WiFiClientSecure wifiClient;
+HttpService httpService(&httpClient, wifiClient);
+
 WiFiEventHandler stationConnectedHandler;
 WiFiEventHandler stationDisconnectedHandler;
 
@@ -42,15 +48,19 @@ void onWiFiDisconnected(const WiFiEventStationModeDisconnected &event) {
     ledManager.SetMode(ConnectingMode);
 }
 
-const String cowAscii = "                __n__n__\n"
-                        "         .------`-\\00/-'\n"
-                        "        /  ##  ## (oo)\n"
-                        "       / \\## __   ./\n"
-                        "          |//YY \\|/\n"
-                        "          |||   |||";
+const String cowAscii = "        __n__n__\n"
+                        "  .------`-\\00/-'\n"
+                        " /  ##  ## (oo)\n"
+                        "/ \\## __   ./\n"
+                        "   |//YY \\|/\n"
+                        "   |||   |||";
 
 void onButtonClicked() {
-    printService.PrintAscii(cowAscii);
+    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
+    String text = httpService.GetStringFromWithRetry(url);
+    if (!text.isEmpty()) {
+        printService.PrintAscii(text);
+    }
 }
 
 void onButtonDoubleClicked() {
@@ -97,6 +107,11 @@ void setup() {
     printer.enableDtr(PRINTER_DTR_PIN, HIGH);
     printer.setCodePage(CODEPAGE_CP437);
     printer.setCharset(CHARSET_USA);
+
+    // HTTP
+    wifiClient.setInsecure();
+    httpClient.useHTTP10(true);
+    httpClient.setReuse(false);
 }
 
 
