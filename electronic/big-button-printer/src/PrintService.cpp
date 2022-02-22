@@ -7,3 +7,8 @@ void PrintService::PrintAscii(String ascii) {
     printer_.println(ascii);
     printer_.feed(3);
 }
+
+void PrintService::PrintBitmap(uint8_t *bitmap, uint16_t width, uint16_t height) {
+    printer_.printBitmap(bitmap, width, height, 1);
+    printer_.feed(3);
+}

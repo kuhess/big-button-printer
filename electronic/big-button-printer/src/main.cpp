@@ -8,6 +8,7 @@
 #include "HttpService.h"
 #include "LedManager.h"
 #include "PrintService.h"
+#include "rocky.h"
 #include "wifi.h"
 
 #ifndef WIFI_H
@@ -64,7 +65,7 @@ void onButtonClicked() {
 }
 
 void onButtonDoubleClicked() {
-    printer.println("double click");
+    printService.PrintBitmap(rocky, rockyWidth, rockyHeight);
 }
 
 void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_t /* buttonState */) {

@@ -9,6 +9,8 @@ public:
 
     void PrintAscii(String ascii);
 
+    void PrintBitmap(uint8_t *bitmap, uint16_t width, uint16_t height);
+
 private:
     Tprinter printer_;
 };
