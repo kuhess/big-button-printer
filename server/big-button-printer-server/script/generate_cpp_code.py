@@ -3,7 +3,7 @@ import more_itertools as mit
 from PIL import Image
 from jinja2.nativetypes import NativeEnvironment
 
-from script.convert import convert_bw, invert_bw
+from convert import convert_bw, invert_bw
 
 TEMPLATE_STR = """uint8_t bitmap[] = {
     // {{ width }}x{{ height }}px
