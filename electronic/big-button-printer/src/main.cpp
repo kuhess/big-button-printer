@@ -7,6 +7,7 @@
 
 #include "HttpService.h"
 #include "LedManager.h"
+#include "lines.h"
 #include "PrintService.h"
 #include "rocky.h"
 #include "wifi.h"
@@ -57,15 +58,21 @@ const String cowAscii = "        __n__n__\n"
                         "   |||   |||";
 
 void onButtonClicked() {
-    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
-    String text = httpService.GetStringFromWithRetry(url);
-    if (!text.isEmpty()) {
-        printService.PrintAscii(text);
-    }
+    //printer.printTestImage();
+    //printer.printImage(lines, linesWidth, linesHeight);
+    printer.printImage(rocky, rockyWidth, rockyHeight);
+    //printService.PrintBitmap(lines, linesWidth, linesHeight);
+//    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
+//    String text = httpService.GetStringFromWithRetry(url);
+//    if (!text.isEmpty()) {
+//        printService.PrintAscii(text);
+//    }
 }
 
 void onButtonDoubleClicked() {
+    // printService.PrintAscii("double click");
     printService.PrintBitmap(rocky, rockyWidth, rockyHeight);
+    // printer.printTestPage();
 }
 
 void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_t /* buttonState */) {
@@ -82,6 +89,7 @@ void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_
 
 
 void setup() {
+    Serial.begin(115200);
     // WiFi
     WiFi.mode(WIFI_STA);
     WiFi.setAutoReconnect(true);
@@ -119,4 +127,7 @@ void setup() {
 void loop() {
     ledManager.Update();
     button.check();
+
+//    onButtonClicked();
+//    delay(1000);
 }

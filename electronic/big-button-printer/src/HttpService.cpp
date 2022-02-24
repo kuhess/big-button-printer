@@ -17,6 +17,7 @@ String HttpService::GetStringFrom(String url) {
     int httpCode = httpClient_->GET();
     if (httpCode < 0) {
         // error on GET: Serial.println(httpClient_->errorToString(httpCode).c_str());
+        // Serial.println(httpClient_->errorToString(httpCode).c_str());
         return "";
     }
     if (httpCode != HTTP_CODE_OK) {
