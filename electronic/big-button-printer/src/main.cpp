@@ -8,7 +8,7 @@
 #include "HttpService.h"
 #include "LedManager.h"
 #include "PrintService.h"
-#include "rocky.h"
+// #include "rocky.h"
 #include "wifi.h"
 
 #ifndef WIFI_H
@@ -65,7 +65,7 @@ void onButtonClicked() {
 }
 
 void onButtonDoubleClicked() {
-    printService.PrintBitmap(rocky, rockyWidth, rockyHeight);
+    // printService.PrintBitmap(rocky, rockyWidth, rockyHeight);
 }
 
 void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_t /* buttonState */) {
@@ -82,7 +82,6 @@ void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_
 
 
 void setup() {
-    Serial.begin(115200);
     // WiFi
     WiFi.mode(WIFI_STA);
     WiFi.setAutoReconnect(true);

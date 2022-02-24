@@ -10,7 +10,7 @@ public:
 
     String GetStringFrom(String url);
 
-    String GetStringFromWithRetry(String url, size_t maxRetry = 3);
+    String GetStringFromWithRetry(String url, size_t maxRetry = 10);
 
 private:
     HTTPClient *httpClient_;
