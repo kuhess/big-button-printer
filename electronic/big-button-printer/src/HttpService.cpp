@@ -11,18 +11,18 @@ String HttpService::GetStringFrom(String url) {
     bool begin_success = httpClient_->begin(wifiClient_, url);
     if (!begin_success) {
         // Unable to connect
-        return "";
+        return "unable to connect";
     }
 
     int httpCode = httpClient_->GET();
     if (httpCode < 0) {
         // error on GET: Serial.println(httpClient_->errorToString(httpCode).c_str());
         // Serial.println(httpClient_->errorToString(httpCode).c_str());
-        return "";
+        return httpClient_->errorToString(httpCode);
     }
     if (httpCode != HTTP_CODE_OK) {
         // not a HTTP 200
-        return "";
+        return "NOT a 200";
     }
 
     text = httpClient_->getString();

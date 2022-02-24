@@ -9,6 +9,6 @@ void PrintService::PrintAscii(String ascii) {
 }
 
 void PrintService::PrintBitmap(uint8_t *bitmap, uint16_t width, uint16_t height) {
-    printer_.printBitmap(bitmap, width, height, 1);
+    printer_.printBitmap2(bitmap, width, height);
     printer_.feed(3);
 }
