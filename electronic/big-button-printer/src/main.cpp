@@ -1,5 +1,7 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
+#include <FS.h>
+#include <LittleFS.h>
 #include <SoftwareSerial.h>
 
 #include <AceButton.h>
@@ -42,11 +44,13 @@ WiFiEventHandler stationConnectedHandler;
 WiFiEventHandler stationDisconnectedHandler;
 
 void onWiFiConnected(const WiFiEventStationModeGotIP &event) {
-    ledManager.SetMode(ConnectedMode);
+    Serial.println("CONNECTED");
+//    ledManager.SetMode(ConnectedMode);
 }
 
 void onWiFiDisconnected(const WiFiEventStationModeDisconnected &event) {
-    ledManager.SetMode(ConnectingMode);
+    Serial.println("!!!!!!!! DISCONNECTED !!!!!!!!!!");
+//    ledManager.SetMode(ConnectingMode);
 }
 
 const String cowAscii = "        __n__n__\n"
@@ -65,7 +69,26 @@ void onButtonClicked() {
 }
 
 void onButtonDoubleClicked() {
-    // printService.PrintBitmap(rocky, rockyWidth, rockyHeight);
+    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
+//    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/rocky_bw.raw";
+    bool loaded_ok = httpService.DownloadDataFrom(url, "/local_image.raw");
+
+    if (!loaded_ok) {
+        Serial.println("fail to download");
+        return;
+    }
+
+    Serial.printf("File exists? %s\n", LittleFS.exists("/local_image.raw") ? "true" : "false");
+
+//    File local_file = LittleFS.open("/local_image.raw", "r");
+//    Serial.printf("Size: %d\n", local_file.size());
+
+//    uint8_t data[(384*384)/8] = {0};
+//
+//    local_file.read(data, (384*384)/8);
+//
+//    printer.printBitmap2(data, 384, 384);
+//    printer.feed(2);
 }
 
 void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_t /* buttonState */) {
@@ -82,41 +105,52 @@ void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_
 
 
 void setup() {
+    Serial.begin(115200);
     // WiFi
     WiFi.mode(WIFI_STA);
-    WiFi.setAutoReconnect(true);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     // Register event handlers
     stationConnectedHandler = WiFi.onStationModeGotIP(&onWiFiConnected);
     stationDisconnectedHandler = WiFi.onStationModeDisconnected(&onWiFiDisconnected);
 
-    // Led
-    ledManager.Setup();
+//    // Led
+//    ledManager.Setup();
+//
+//    // Button
+//    pinMode(BUTTON_PIN, INPUT_PULLUP);
+//    ace_button::ButtonConfig *buttonConfig = button.getButtonConfig();
+//    buttonConfig->setEventHandler(handleEvent);
+//    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureDoubleClick);
+//    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
+//    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterClick);
+//    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterDoubleClick);
+//
+//    // Printer
+//    printerSerial.begin(printerBaudRate);
+//    printer.begin();
+//    printer.enableDtr(PRINTER_DTR_PIN, HIGH);
+//    printer.setCodePage(CODEPAGE_CP437);
+//    printer.setCharset(CHARSET_USA);
 
-    // Button
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
-    ace_button::ButtonConfig *buttonConfig = button.getButtonConfig();
-    buttonConfig->setEventHandler(handleEvent);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureDoubleClick);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterClick);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterDoubleClick);
-
-    // Printer
-    printerSerial.begin(printerBaudRate);
-    printer.begin();
-    printer.enableDtr(PRINTER_DTR_PIN, HIGH);
-    printer.setCodePage(CODEPAGE_CP437);
-    printer.setCharset(CHARSET_USA);
+    // Initialise LittleFS
+    if (!LittleFS.begin()) {
+        Serial.println("LittleFS initialisation failed!");
+        while (1) yield(); // Stay here twiddling thumbs waiting
+    }
 
     // HTTP
     wifiClient.setInsecure();
-    httpClient.useHTTP10(true);
-    httpClient.setReuse(false);
+//    httpClient.useHTTP10(true);
+//    httpClient.setReuse(false);
 }
 
 
 void loop() {
-    ledManager.Update();
-    button.check();
+    Serial.println("Let's try!");
+    onButtonDoubleClicked();
+    Serial.println("End");
+    delay(2000);
+
+//    ledManager.Update();
+//    button.check();
 }

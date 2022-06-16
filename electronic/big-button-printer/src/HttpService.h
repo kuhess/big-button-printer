@@ -10,7 +10,11 @@ public:
 
     String GetStringFrom(String url);
 
-    String GetStringFromWithRetry(String url, size_t maxRetry = 10);
+    String GetStringFromWithRetry(String url, size_t maxRetry = 3);
+
+    bool DownloadDataFrom(String url, String filename);
+
+    bool DownloadDataFromWithRetry(String url, String filename, size_t maxRetry = 3);
 
 private:
     HTTPClient *httpClient_;
