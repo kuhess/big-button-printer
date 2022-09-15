@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
-#include <ArduinoLog.h>
 #include <LittleFS.h>
 
 #include "TPrinter.h"
@@ -30,16 +29,8 @@ void setup() {
 
     LittleFS.begin();
 
-    // byte buffer[1152];
-    // for (size_t i = 0; i < 1152; i++) {
-    //     buffer[i] = 0b01010101;
-    // }
-    // printer.printRawImage(buffer, 384, 24);
-
-    File image_file = LittleFS.open("/line.raw", "r");
-    byte buffer[1152];
-    image_file.readBytes((char *) buffer, 1152);
-    printer.printRawImage(buffer, 384, 24);
+    File image_file = LittleFS.open("/quentin.raw", "r");
+    printer.printRawImage(&image_file, 384);
 }
 
 void loop() {

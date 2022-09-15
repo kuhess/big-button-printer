@@ -534,50 +534,44 @@ void Tprinter::printBitmap(uint8_t *bitmap, uint16_t width, uint16_t height, uin
   }
 }
 
-void Tprinter::printRawImage(byte *raw, uint16_t width, uint16_t height) {
-    uint8_t mode = 33;
-    uint8_t band_height = 24;
+void Tprinter::printRawImage(File *raw_stream, uint16_t width) {
+  size_t file_size = raw_stream->size();
+  uint32_t height = 8*file_size / width;
 
-    uint8_t nL = width % 256; // lower byte of width
-    uint8_t nH = width / 256; // higher byte of width
+  uint8_t mode = 33;
+  uint8_t band_height = 24;
 
-    feed(1);
-    wait();
+  uint8_t nL = width % 256; // lower byte of width
+  uint8_t nH = width / 256; // higher byte of width
 
-    // Set line space = band_height
-    // stream->write(A_ESC);
-    // stream->write(0x33);
-    // stream->write(band_height);
-    // setDelay(3 * char_send_time);
+  feed(1);
+  wait();
 
-    // int band = 0;
-    uint8_t num_bands = height / band_height + (height % band_height > 0);  // ceiling division
-    println(num_bands);
+  uint8_t num_bands = height / band_height + (height % band_height > 0);  // ceiling division
 
+  uint32_t i = 0;
+  for (uint8_t n = 0; n < num_bands; n++) {
+    // header
+    stream->write(A_ESC);
+    stream->write(A_STAR);
+    stream->write(mode);
+    stream->write(nL);
+    stream->write(nH);
+    setDelay(5 * char_send_time);
 
-    uint32_t i = 0;
-    for (uint8_t n = 0; n < num_bands; n++) {
-      // header
-      stream->write(A_ESC);
-      stream->write(A_STAR);
-      stream->write(mode);
-      stream->write(nL);
-      stream->write(nH);
-      setDelay(5 * char_send_time);
-
-      for (uint16_t col = 0; col < width; col++) {
-        for (uint8_t k = 0; k < 3; k++) {
-          sendBitmapByte(raw[i]);
-          i++;
+    for (uint16_t col = 0; col < width; col++) {
+      for (uint8_t k = 0; k < 3; k++) {
+        if (i >= file_size) {
+          sendBitmapByte(0x00);
         }
+        byte vpixels = raw_stream->read();
+        sendBitmapByte(vpixels);
+        i++;
       }
-
-      // Feed line
-      write('\n');
     }
 
-    // Reset line space
-    // stream->write(A_ESC);
-    // stream->write(0x32);
-    // setDelay(2 * char_send_time);
+    // Feed line
+    write('\n');
+    setDelay(char_send_time);
+  }
 }

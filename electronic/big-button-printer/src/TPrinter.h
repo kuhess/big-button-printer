@@ -11,6 +11,7 @@
 #ifndef TPrinter_h
 #define TPrinter_h
 #include "Arduino.h"
+#include <LittleFS.h>
 
 #define A_GS 29
 #define A_DC2 18    // Device control 2
@@ -195,7 +196,7 @@ class Tprinter : public Print {
       printBitmap(uint8_t *bitmap, uint16_t width, uint16_t height, uint8_t scale = 1, bool center = true),
       // scale: default - 1, orginal size; if 0 or bigger than possible - max possible scale
       // center: if not set or true - centered
-      printRawImage(byte *raw, uint16_t width, uint16_t height),
+      printRawImage(File *raw_stream, uint16_t width),
 
       // use below only if printer use hardware serial
       identifyChars(char *tab),  // require Serial.print(baudrate); in void setup()
