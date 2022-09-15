@@ -2,10 +2,20 @@
 #include <SoftwareSerial.h>
 
 #include <AceButton.h>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
 #include <jled.h>
 #include <LittleFS.h>
 
+#include "HttpService.h"
 #include "TPrinter.h"
+
+#include "wifi.h"
+
+#ifndef WIFI_H
+#define WIFI_SSID "<SSID>"
+#define WIFI_PASSWORD "<PASSWORD>"
+#endif
 
 
 // Printer
@@ -25,6 +35,21 @@ const byte button_pin = D2;
 JLed led = JLed(led_pin);
 ace_button::AceButton button(button_pin, LOW);
 
+HTTPClient httpClient;
+WiFiClientSecure wifiClient;
+
+WiFiEventHandler stationConnectedHandler;
+WiFiEventHandler stationDisconnectedHandler;
+
+HttpService http_service(&httpClient, &wifiClient);
+
+void onWiFiConnected(const WiFiEventStationModeGotIP &event) {
+    printer.println("Connected");
+}
+
+void onWiFiDisconnected(const WiFiEventStationModeDisconnected &event) {
+    Serial.println("!!! Disconnected !!!");
+}
 
 void setupPrinter() {
     mySerial.begin(printerBaudrate);
@@ -35,13 +60,17 @@ void setupPrinter() {
 }
 
 void onButtonClicked() {
-    printer.println("Click");
-    // File image_file = LittleFS.open("/384.raw", "r");
-    // printer.printRawImage(&image_file, 384);
+    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
+    String text = http_service.GetStringFrom(url);
+    printer.println(text);
 }
 
 void onButtonDoubleClicked() {
-    printer.println("Double click");
+    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/384.raw";
+    if (http_service.DownloadDataFrom(url, "/image.raw")) {
+        File image_file = LittleFS.open("/image.raw", "r");
+        printer.printRawImage(&image_file, 384);
+    }
 }
 
 void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_t /* buttonState */) {
@@ -57,8 +86,20 @@ void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_
 }
 
 void setup() {
+    // WiFi
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    // Register event handlers
+    stationConnectedHandler = WiFi.onStationModeGotIP(&onWiFiConnected);
+    stationDisconnectedHandler = WiFi.onStationModeDisconnected(&onWiFiDisconnected);
+
+    // HTTP
+    wifiClient.setInsecure();
+
+    // File System
     LittleFS.begin();
 
+    // Printer
     setupPrinter();
 
     // Button & LED
