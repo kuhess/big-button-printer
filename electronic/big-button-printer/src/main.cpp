@@ -44,11 +44,11 @@ WiFiEventHandler stationDisconnectedHandler;
 HttpService http_service(&httpClient, &wifiClient);
 
 void onWiFiConnected(const WiFiEventStationModeGotIP &event) {
-    printer.println("Connected");
+    led.Breathe(2000).Forever();
 }
 
 void onWiFiDisconnected(const WiFiEventStationModeDisconnected &event) {
-    Serial.println("!!! Disconnected !!!");
+    led.Blink(250, 250).Forever();
 }
 
 void setupPrinter() {
@@ -60,16 +60,18 @@ void setupPrinter() {
 }
 
 void onButtonClicked() {
-    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
-    String text = http_service.GetStringFrom(url);
-    printer.println(text);
-}
-
-void onButtonDoubleClicked() {
     String url = "https://raw.githubusercontent.com/kuhess/test-images/main/384.raw";
     if (http_service.DownloadDataFrom(url, "/image.raw")) {
         File image_file = LittleFS.open("/image.raw", "r");
         printer.printRawImage(&image_file, 384);
+    }
+}
+
+void onButtonDoubleClicked() {
+    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
+    String text = http_service.GetStringFrom(url);
+    if (!text.isEmpty()) {
+        printer.println(text);
     }
 }
 
@@ -86,6 +88,19 @@ void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_
 }
 
 void setup() {
+    // Button & LED
+    pinMode(led_pin, OUTPUT);
+    pinMode(button_pin, INPUT_PULLUP);
+
+    led.Blink(250, 250).Forever();
+
+    ace_button::ButtonConfig *buttonConfig = button.getButtonConfig();
+    buttonConfig->setEventHandler(handleEvent);
+    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureDoubleClick);
+    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
+    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterClick);
+    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterDoubleClick);
+
     // WiFi
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -101,19 +116,6 @@ void setup() {
 
     // Printer
     setupPrinter();
-
-    // Button & LED
-    pinMode(led_pin, OUTPUT);
-    pinMode(button_pin, INPUT_PULLUP);
-
-    ace_button::ButtonConfig *buttonConfig = button.getButtonConfig();
-    buttonConfig->setEventHandler(handleEvent);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureDoubleClick);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressClickBeforeDoubleClick);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterClick);
-    buttonConfig->setFeature(ace_button::ButtonConfig::kFeatureSuppressAfterDoubleClick);
-
-    led.Breathe(2000).Forever();
 }
 
 void loop() {
