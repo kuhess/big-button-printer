@@ -1,4 +1,6 @@
 wifi.h
+*.raw
+*.png
 
 .pio
 .vscode
