@@ -102,7 +102,7 @@ void onButtonDoubleClicked() {
 
     printer.feed(2);
     printer.justify('C');
-    printer.println("< La Bo\x8c" "te \x85" " Tickets >");
+    printer.println("< La Bo\x8c" "te \x85" " Jeux >");
     printer.feed(1);
     printer.printRawImage(&logo, 384);
     printer.feed(1);
