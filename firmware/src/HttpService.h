@@ -4,6 +4,7 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecure.h>
 
+
 class HttpService {
 public:
     explicit HttpService(HTTPClient *httpClient, WiFiClientSecure *wifiClient);

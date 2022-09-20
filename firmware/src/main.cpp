@@ -3,6 +3,7 @@
 
 #include <AceButton.h>
 #include <ESP8266HTTPClient.h>
+#include <ESP8266TrueRandom.h>
 #include <ESP8266WiFi.h>
 #include <jled.h>
 #include <LittleFS.h>
@@ -48,7 +49,7 @@ void onWiFiConnected(const WiFiEventStationModeGotIP &event) {
 }
 
 void onWiFiDisconnected(const WiFiEventStationModeDisconnected &event) {
-    led.Blink(250, 250).Forever();
+    led.Blink(200, 200).Forever();
 }
 
 void setupPrinter() {
@@ -60,19 +61,57 @@ void setupPrinter() {
 }
 
 void onButtonClicked() {
-    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/384.raw";
+    if (!WiFi.isConnected()) {
+        return;
+    }
+
+    uint32_t number = ESP8266TrueRandom.random(1000);
+
+    printer.feed(2);
+    printer.justify('C');
+    printer.print("< Jeu n\xf8");
+    printer.print(number);
+    printer.println(" >");
+    printer.feed(1);
+
+    char filename[16];
+    sprintf(filename, "game_%04d.raw", number);
+    String url = "https://raw.githubusercontent.com/kuhess/printer-images/main/" + String(filename);
     if (http_service.DownloadDataFrom(url, "/image.raw")) {
         File image_file = LittleFS.open("/image.raw", "r");
         printer.printRawImage(&image_file, 384);
+    } else {
+        printer.println("Whoops...");
+        printer.feed(1);
+        printer.justify('L');
+        printer.println("                __n__n__\n"
+            "         .------`-\\00/-'\n"
+            "        /  ##  ## (oo)\n"
+            "       / \\## __   ./\n"
+            "          |//YY \\|/\n"
+            "          |||   |||");
+        printer.justify('C');
+        printer.feed(1);
+        printer.println("Un probl\x8a" "me est survenu");
     }
+    printer.feed(6);
 }
 
 void onButtonDoubleClicked() {
-    String url = "https://raw.githubusercontent.com/kuhess/test-images/main/001.txt";
-    String text = http_service.GetStringFrom(url);
-    if (!text.isEmpty()) {
-        printer.println(text);
-    }
+    File logo = LittleFS.open("/logo.raw", "r");
+
+    printer.feed(2);
+    printer.justify('C');
+    printer.println("< La Bo\x8c" "te \x85" " Tickets >");
+    printer.feed(1);
+    printer.printRawImage(&logo, 384);
+    printer.feed(1);
+    printer.println("hello\x40quentinsuire.com");
+    printer.feed(1);
+    printer.setMode(FONT_B);
+    printer.println("projet r\x82" "alis\x82" " en 2022");
+    printer.unsetMode(FONT_B);
+    printer.feed(5);
 }
 
 void handleEvent(ace_button::AceButton * /* button */, uint8_t eventType, uint8_t /* buttonState */) {

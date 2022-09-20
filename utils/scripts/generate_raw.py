@@ -1,7 +1,7 @@
 import click
-import more_itertools as mit
 from PIL import Image, ImageOps
 from PIL.Image import FLOYDSTEINBERG
+
 
 def ceiling_division(n, d):
     return -(n // -d)
@@ -38,7 +38,7 @@ def slice_to_bytes(slice: Image) -> bytes:
 @click.option("-w", "--width", default=384)
 @click.argument("input_file")
 @click.argument("output_file")
-def generate_cpp_code(width, input_file, output_file):
+def generate_raw(width, input_file, output_file):
     with Image.open(input_file) as im:
         resized_im = ImageOps.contain(im, (width, 10000))
         bw_im = resized_im.convert(mode="1", dither=FLOYDSTEINBERG)
@@ -54,12 +54,12 @@ def generate_cpp_code(width, input_file, output_file):
                 out.write(data)
 
 
-        # create CPP variable declaration
-        # data = inverted_im.tobytes()
-
-    # with open(output_file, "wb") as out:
-    #     out.write(data)
+def run_sudokus():
+    for i in range(10000):
+        input_path = f"images/sudoku/sudoku_{i:04d}.png"
+        output_path = f"images/output/sudoku/sudoku_{i:04d}.raw"
+        generate_raw(384, input_path, output_path)
 
 
 if __name__ == "__main__":
-    generate_cpp_code()
+    generate_raw()
